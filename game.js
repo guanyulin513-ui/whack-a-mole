@@ -12,7 +12,7 @@ let playing = false;
 
 // ✅ 星星速度：調快到會有殘影（每 16ms 約 60FPS）
 // 你要「快到出現殘影」=> 直接用高頻率 + ghost 殘影
-const moveMs = 16;
+const moveMs = 8;
 
 // 殘影強度（每幾次移動留一次殘影；數字越小越多殘影）
 const ghostEveryNMoves = 1;
@@ -175,4 +175,5 @@ gameArea.addEventListener("click", () => {
 startBtn.addEventListener("click", startGame);
 
 // 初始不自動開始（維持原本按開始）
+
 
