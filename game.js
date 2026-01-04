@@ -90,7 +90,7 @@ function endGame(win) {
 
 // 有機率變金色星星
 function rollTargetType() {
-  const isGold = Math.random() < 0.2;
+  const isGold = Math.random() < 1;
   if (isGold) {
     target.classList.add("gold");
     target.textContent = "⭐";
@@ -175,3 +175,4 @@ gameArea.addEventListener("click", () => {
 startBtn.addEventListener("click", startGame);
 
 // 初始不自動開始（維持原本按開始）
+
