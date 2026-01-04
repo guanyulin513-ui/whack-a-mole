@@ -1,25 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>點擊得分遊戲</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>點到星星就贏</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>點擊得分（打地鼠不是很正常版）</h1>
+  <main class="app">
+    <header class="topbar">
+      <h1 class="title">點到星星就贏</h1>
+      <div class="hud">
+        <div class="timer" aria-live="polite">
+          剩餘時間：<span id="timeLeft">60</span>s
+        </div>
+        <button id="btnRestart" class="btn" type="button">重新開始</button>
+      </div>
+    </header>
 
-  <div class="panel">
-    <div>分數：<span id="score">0</span></div>
-    <div>剩餘時間：<span id="time">30</span> 秒</div>
-    <button id="startBtn">開始遊戲</button>
-  </div>
+    <section class="instructions" id="instructions">
+      <p>說明：點到星星就贏了。</p>
+      <p class="sub">（點到空白不會有事。遊戲時間 60 秒。）</p>
+    </section>
 
-  <div id="gameArea">
-    <button id="target" aria-label="目標">🎯</button>
-  </div>
+    <section class="stage-wrap">
+      <div id="stage" class="stage" role="application" aria-label="遊戲區域">
+        <!-- 星星由 game.js 產生 -->
+      </div>
+    </section>
 
-  <p id="message">按「開始遊戲」後，快點點🎯！注意：點空白會扣分。</p>
+    <footer class="footer">
+      <span id="statusText">準備開始！</span>
+    </footer>
+  </main>
 
   <script src="game.js"></script>
 </body>
