@@ -1,143 +1,55 @@
-/* RWD: 讓畫面隨裝置大小自適應 */
-:root{
-  --bg: #0b1020;
-  --panel: rgba(255,255,255,0.06);
-  --panel2: rgba(255,255,255,0.10);
-  --text: #e9eefc;
-  --muted: rgba(233,238,252,0.75);
-  --accent: #ffd54a;
-  --danger: #ff5b6e;
-  --radius: 16px;
+body {
+  font-family: system-ui, "Noto Sans TC", sans-serif;
+  text-align: center;
 }
 
-*{ box-sizing: border-box; }
-html, body{
-  height: 100%;
-  margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
-  background: radial-gradient(1200px 700px at 20% 10%, #1a2b6b 0%, var(--bg) 60%);
-  color: var(--text);
-}
-
-.app{
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: clamp(12px, 2.5vw, 24px);
-  gap: 12px;
-}
-
-.topbar{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: var(--panel);
-  border: 1px solid rgba(255,255,255,0.10);
-  padding: 12px 14px;
-  border-radius: var(--radius);
-}
-
-.title{
-  margin: 0;
-  font-size: clamp(18px, 2.8vw, 28px);
-  letter-spacing: 0.5px;
-}
-
-.hud{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.timer{
-  font-size: clamp(14px, 2.2vw, 18px);
-  color: var(--muted);
-  padding: 8px 10px;
-  background: var(--panel2);
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.10);
-}
-
-.btn{
-  appearance: none;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.10);
-  color: var(--text);
-  padding: 8px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: transform 120ms ease, background 120ms ease;
-}
-.btn:hover{ background: rgba(255,255,255,0.14); }
-.btn:active{ transform: translateY(1px); }
-
-.instructions{
-  background: var(--panel);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-}
-.instructions p{
-  margin: 0;
-  font-size: clamp(14px, 2.1vw, 16px);
-}
-.instructions .sub{
-  margin-top: 6px;
-  color: var(--muted);
-  font-size: clamp(12px, 2.0vw, 14px);
-}
-
-/* 遊戲區域：自適應尺寸
-   - 高度用視窗扣掉上方資訊區，並限制最大高度，避免超出畫面
-*/
-.stage-wrap{
-  flex: 1;
-  display: flex;
-  min-height: 0;
-}
-
-.stage{
-  position: relative;
-  width: 100%;
-  height: min(62vh, 640px);
-  flex: 1;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: var(--radius);
-  overflow: hidden;
-  touch-action: manipulation; /* 手機點擊更順 */
-}
-
-/* 星星 */
-.star{
-  position: absolute;
-  width: clamp(44px, 6vw, 72px);
-  height: clamp(44px, 6vw, 72px);
-  display: grid;
-  place-items: center;
-  font-size: clamp(26px, 3.6vw, 40px);
-  cursor: pointer;
-  user-select: none;
-  transform: translate(-50%, -50%);
-  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
-  transition: transform 120ms ease;
-}
-.star:active{
-  transform: translate(-50%, -50%) scale(0.95);
-}
-
-.footer{
+.panel {
   display: flex;
   justify-content: center;
+  gap: 20px;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  background: var(--panel);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: var(--muted);
-  font-size: 14px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+#gameArea {
+  /* ✅ 只改這裡：改成隨裝置畫面縮放（保留原本 520px 的上限） */
+  width: min(520px, 92vw);
+  height: min(320px, 60vh);
+
+  /* 下面是把你檔案中「...」缺掉的內容補回來（維持原本用途） */
+  margin: 0 auto;
+  position: relative;
+  border: 2px solid #333;
+  border-radius: 10px;
+  overflow: hidden;
+
+  display: none; /* 還沒開始前先隱藏 */
+  user-select: none;
+}
+
+#target {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 0;
+  cursor: pointer;
+  font-size: 34px;
+  background: #fff;
+}
+
+/* 金色星星的外觀 */
+#target.gold {
+  background: gold;
+  box-shadow: 0 0 16px rgba(255, 200, 0, 0.8);
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+#message {
+  margin-top: 12px;
+  font-weight: 600;
 }
