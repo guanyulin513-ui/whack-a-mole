@@ -1,128 +1,97 @@
-const scoreEl = document.getElementById("score");
-const timeEl = document.getElementById("time");
-const startBtn = document.getElementById("startBtn");
-const gameArea = document.getElementById("gameArea");
-const target = document.getElementById("target");
-const message = document.getElementById("message");
+(() => {
+  const stage = document.getElementById("stage");
+  const timeLeftEl = document.getElementById("timeLeft");
+  const statusText = document.getElementById("statusText");
+  const btnRestart = document.getElementById("btnRestart");
 
-let score = 0;
-let timeLeft = 30;
+  const GAME_SECONDS = 60;
 
-let timerId = null;  // 倒數用
-let moveId = null;   // 目標自動移動用
-let playing = false;
+  let timerId = null;
+  let timeLeft = GAME_SECONDS;
+  let gameEnded = false;
 
-// 固定速度（不會越來越快）
-const moveMs = 2000;       // 目標每 ?秒換一次位置
-const starChance = 0.1;  // 星星出現機率 100%
+  // 產生星星（單顆，點到就贏）
+  function spawnStar() {
+    stage.innerHTML = "";
 
-// 讓目標跳到隨機位置
-function moveTargetRandom() {
-  const areaWidth = gameArea.clientWidth;
-  const areaHeight = gameArea.clientHeight;
+    const star = document.createElement("div");
+    star.className = "star";
+    star.setAttribute("role", "button");
+    star.setAttribute("aria-label", "星星");
+    star.textContent = "⭐";
 
-  const size = target.offsetWidth;
-  const maxX = areaWidth - size;
-  const maxY = areaHeight - size;
+    // 隨機位置（避免貼邊）
+    const rect = stage.getBoundingClientRect();
+    const padding = 40;
+    const x = rand(padding, Math.max(padding, rect.width - padding));
+    const y = rand(padding, Math.max(padding, rect.height - padding));
 
-  const x = Math.floor(Math.random() * maxX);
-  const y = Math.floor(Math.random() * maxY);
+    star.style.left = `${x}px`;
+    star.style.top = `${y}px`;
 
-  target.style.left = x + "px";
-  target.style.top = y + "px";
-}
+    // 點到星星就贏
+    star.addEventListener("click", (e) => {
+      e.stopPropagation();
+      winGame();
+    });
 
-// 決定這次是一般🎯還是金色⭐
-function rollTargetType() {
-  const isStar = Math.random() < starChance;
-
-  if (isStar) {
-    target.textContent = "⭐";
-    target.classList.add("gold");
-    target.dataset.type = "star";
-  } else {
-    target.textContent = "🎯";
-    target.classList.remove("gold");
-    target.dataset.type = "normal";
+    stage.appendChild(star);
   }
-}
 
-function startGame() {
-  if (playing) return;
+  // 點到空白不會有事：只在遊戲結束後給提示（不扣分、不變化）
+  stage.addEventListener("click", () => {
+    if (gameEnded) return;
+    // 依需求：點空白不會有事 -> 什麼都不做
+  });
 
-  playing = true;
-  score = 0;
-  timeLeft = 30;
+  function startGame() {
+    clearInterval(timerId);
+    gameEnded = false;
 
-  scoreEl.textContent = score;
-  timeEl.textContent = timeLeft;
+    timeLeft = GAME_SECONDS;
+    timeLeftEl.textContent = String(timeLeft);
+    statusText.textContent = "遊戲開始！點到星星就贏！";
 
-  message.textContent = "開始！點🎯 +1 分，點⭐ +3 分；點空白 -1 分。";
-  startBtn.disabled = true;
+    spawnStar();
 
-  target.style.display = "block";
+    timerId = setInterval(() => {
+      if (gameEnded) return;
 
-  // 先放一次位置與類型
-  rollTargetType();
-  moveTargetRandom();
+      timeLeft -= 1;
+      timeLeftEl.textContent = String(timeLeft);
 
-  // 固定速度自動移動（不加速）
-  clearInterval(moveId);
-  moveId = setInterval(() => {
-    if (!playing) return;
-    rollTargetType();
-    moveTargetRandom();
-  }, moveMs);
+      if (timeLeft <= 0) {
+        loseGame();
+      }
+    }, 1000);
+  }
 
-  // 倒數計時
-  clearInterval(timerId);
-  timerId = setInterval(() => {
-    timeLeft -= 1;
-    timeEl.textContent = timeLeft;
+  function winGame() {
+    if (gameEnded) return;
+    gameEnded = true;
+    clearInterval(timerId);
+    statusText.textContent = "你贏了！🎉（點重新開始再玩一次）";
+  }
 
-    if (timeLeft <= 0) {
-      endGame();
-    }
-  }, 1000);
-}
+  function loseGame() {
+    if (gameEnded) return;
+    gameEnded = true;
+    clearInterval(timerId);
+    statusText.textContent = "時間到！再試一次～（點重新開始）";
+  }
 
-function endGame() {
-  playing = false;
+  function rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
-  clearInterval(timerId);
-  clearInterval(moveId);
+  // 視窗尺寸變動時，重新放置星星（保持在可視區）
+  window.addEventListener("resize", () => {
+    if (gameEnded) return;
+    spawnStar();
+  });
 
-  target.style.display = "none";
-  startBtn.disabled = false;
+  btnRestart.addEventListener("click", startGame);
 
-  message.textContent = `時間到！你的分數是：${score}`;
-}
-
-// 點到目標（🎯或⭐）
-target.addEventListener("click", (e) => {
-  if (!playing) return;
-
-  // 避免點到目標也被算成點空白
-  e.stopPropagation();
-
-  const type = target.dataset.type;
-
-  if (type === "star") score += 3;
-  else score += 1;
-
-  scoreEl.textContent = score;
-
-  // 點到後立刻換位置，手感更好
-  rollTargetType();
-  moveTargetRandom();
-});
-
-// 點空白處扣分（點到 gameArea 但不是 target）
-gameArea.addEventListener("click", () => {
-  if (!playing) return;
-
-  score -= 1;
-  scoreEl.textContent = score;
-});
-
-startBtn.addEventListener("click", startGame);
+  // 初始啟動
+  startGame();
+})();
