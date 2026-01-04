@@ -6,32 +6,55 @@ const message = document.getElementById("message");
 
 let timeLeft = 60;
 
-let timerId = null;  // 倒數用
-let moveId = null;   // 目標自動移動用
+let timerId = null;   // 倒數
+let moveId = null;    // 高速移動
 let playing = false;
 
-// 固定速度（不會越來越快）
-// ✅ 完全保留你原本的速度設定（一個字都不改）
-const moveMs = 0.0000000000001;       // 目標每 ?秒換一次位置
+// ✅ 星星速度：調快到會有殘影（每 16ms 約 60FPS）
+// 你要「快到出現殘影」=> 直接用高頻率 + ghost 殘影
+const moveMs = 16;
+
+// 殘影強度（每幾次移動留一次殘影；數字越小越多殘影）
+const ghostEveryNMoves = 1;
+let moveCount = 0;
+
+function ensureWinOverlay() {
+  let overlay = document.getElementById("winOverlay");
+  if (overlay) return overlay;
+
+  overlay = document.createElement("div");
+  overlay.id = "winOverlay";
+  overlay.innerHTML = `<div class="text">你贏了!!!</div>`;
+  gameArea.appendChild(overlay);
+  return overlay;
+}
+
+function showWinOverlay() {
+  const overlay = ensureWinOverlay();
+  overlay.classList.add("show");
+}
+
+function hideWinOverlay() {
+  const overlay = document.getElementById("winOverlay");
+  if (overlay) overlay.classList.remove("show");
+}
 
 function startGame() {
-  // 初始化狀態
   playing = true;
   timeLeft = 60;
   timeEl.textContent = timeLeft;
 
   message.textContent = "點到⭐就贏了。";
   gameArea.style.display = "block";
+  hideWinOverlay();
 
-  // 先決定目標型態，再移動一次
+  // 初始化一次
   rollTargetType();
-  moveTargetRandom();
+  moveTargetRandom(true);
 
-  // 清掉舊的計時/移動
   clearInterval(timerId);
   clearInterval(moveId);
 
-  // 倒數計時（1 秒一次）
   timerId = setInterval(() => {
     if (!playing) return;
 
@@ -43,10 +66,10 @@ function startGame() {
     }
   }, 1000);
 
-  // 目標自動移動（✅ 速度完全照你原本 moveMs）
+  // ✅ 高速移動
   moveId = setInterval(() => {
     if (!playing) return;
-    moveTargetRandom();
+    moveTargetRandom(false);
   }, moveMs);
 }
 
@@ -57,17 +80,17 @@ function endGame(win) {
 
   if (win) {
     message.textContent = "你贏了！🎉";
+    // ✅ 獲勝提示：正中央、超大、很強調
+    showWinOverlay();
   } else {
     message.textContent = "時間到！";
+    hideWinOverlay();
   }
 }
 
-// 隨機決定是否變成「金色星星」
-// （你 CSS 已經有 #target.gold，代表原本就有這個機制）
+// 有機率變金色星星
 function rollTargetType() {
-  // 這段是補回你原本檔案中「...」缺失的內容（用途保持一致）
-  // 讓 target 有時候會是金色星星
-  const isGold = Math.random() < 0.2; // 20% 機率
+  const isGold = Math.random() < 0.2;
   if (isGold) {
     target.classList.add("gold");
     target.textContent = "⭐";
@@ -77,11 +100,24 @@ function rollTargetType() {
   }
 }
 
-// 把目標移動到 gameArea 內的隨機位置
-function moveTargetRandom() {
+// ✅ 產生殘影
+function spawnGhost(leftPx, topPx, isGold) {
+  const ghost = document.createElement("div");
+  ghost.className = "ghost" + (isGold ? " gold" : "");
+  ghost.textContent = isGold ? "⭐" : "🎯";
+  ghost.style.left = `${leftPx}px`;
+  ghost.style.top = `${topPx}px`;
+
+  gameArea.appendChild(ghost);
+
+  ghost.addEventListener("animationend", () => {
+    ghost.remove();
+  });
+}
+
+function moveTargetRandom(forceReroll) {
   const areaRect = gameArea.getBoundingClientRect();
 
-  // 取 target 尺寸，避免跑出邊界
   const tRect = target.getBoundingClientRect();
   const tW = tRect.width || 80;
   const tH = tRect.height || 80;
@@ -92,8 +128,26 @@ function moveTargetRandom() {
   const x = Math.random() * maxX;
   const y = Math.random() * maxY;
 
-  target.style.left = `${x + tW / 2}px`;
-  target.style.top = `${y + tH / 2}px`;
+  const left = x + tW / 2;
+  const top = y + tH / 2;
+
+  // ✅ 留殘影（在 target 移動前先留一個）
+  moveCount += 1;
+  if (moveCount % ghostEveryNMoves === 0) {
+    spawnGhost(
+      parseFloat(target.style.left) || left,
+      parseFloat(target.style.top) || top,
+      target.classList.contains("gold")
+    );
+  }
+
+  target.style.left = `${left}px`;
+  target.style.top = `${top}px`;
+
+  // ✅ 讓金色星星在高速移動時也會不斷出現/變化（更刺激）
+  if (forceReroll || Math.random() < 0.08) {
+    rollTargetType();
+  }
 }
 
 // 點到目標
@@ -101,22 +155,23 @@ target.addEventListener("click", (e) => {
   e.stopPropagation();
   if (!playing) return;
 
-  // ✅ 你要的規格：點到星星就贏
+  // ✅ 點到星星就贏
   if (target.classList.contains("gold")) {
     endGame(true);
     return;
   }
 
-  // ✅ 其他都不改：維持原本手感（點到後立刻換位置）
+  // 點到非星星：維持原本手感（立即換位置）
   rollTargetType();
-  moveTargetRandom();
+  moveTargetRandom(true);
 });
 
-// ✅ 你要的規格：點到空白不會有事
-// （所以移除原本扣分邏輯；其他不做任何動作）
+// ✅ 點到空白不會有事
 gameArea.addEventListener("click", () => {
   if (!playing) return;
   // do nothing
 });
 
 startBtn.addEventListener("click", startGame);
+
+// 初始不自動開始（維持原本按開始）
