@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>點擊得分遊戲</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>點擊得分（打地鼠不是很正常版）</h1>
+
+  <div class="panel">
+    <div>分數：<span id="score">0</span></div>
+    <div>剩餘時間：<span id="time">30</span> 秒</div>
+    <button id="startBtn">開始遊戲</button>
+  </div>
+
+  <div id="gameArea">
+    <button id="target" aria-label="目標">🎯</button>
+  </div>
+
+  <p id="message">按「開始遊戲」後，快點點🎯！注意：點空白會扣分。</p>
+
+  <script src="game.js"></script>
+</body>
+</html>

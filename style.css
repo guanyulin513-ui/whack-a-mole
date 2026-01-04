@@ -1,0 +1,49 @@
+body {
+  font-family: system-ui, "Noto Sans TC", sans-serif;
+  text-align: center;
+}
+
+.panel {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+#gameArea {
+  width: 520px;
+  height: 320px;
+  border: 3px solid #333;
+  border-radius: 12px;
+  margin: 0 auto;
+  position: relative;
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+/* 目標按鈕 */
+#target {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 30px;
+  display: none; /* 還沒開始前先隱藏 */
+  user-select: none;
+}
+
+/* 金色星星的外觀 */
+#target.gold {
+  background: gold;
+  box-shadow: 0 0 16px rgba(255, 200, 0, 0.8);
+  transform: scale(1.05);
+}
+
+#message {
+  margin-top: 12px;
+  font-weight: 600;
+}
